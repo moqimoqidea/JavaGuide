@@ -1,5 +1,5 @@
 ---
-title: CDN常见问题总结
+title: CDN工作原理详解
 category: 高性能
 head:
   - - meta
@@ -33,7 +33,7 @@ head:
 
 ![阿里云文档：https://help.aliyun.com/document_detail/64836.html](https://oss.javaguide.cn/github/javaguide/high-performance/cdn/cdn-aliyun-dcdn.png)
 
-绝大部分公司都会在项目开发中交使用 CDN 服务，但很少会有自建 CDN 服务的公司。基于成本、稳定性和易用性考虑，建议直接选择专业的云厂商（比如阿里云、腾讯云、华为云、青云）或者 CDN 厂商（比如网宿、蓝汛）提供的开箱即用的 CDN 服务。
+绝大部分公司都会在项目开发中使用 CDN 服务，但很少会有自建 CDN 服务的公司。基于成本、稳定性和易用性考虑，建议直接选择专业的云厂商（比如阿里云、腾讯云、华为云、青云）或者 CDN 厂商（比如网宿、蓝汛）提供的开箱即用的 CDN 服务。
 
 很多朋友可能要问了：**既然是就近访问，为什么不直接将服务部署在多个不同的地方呢？**
 
@@ -52,13 +52,22 @@ head:
 
 ### 静态资源是如何被缓存到 CDN 节点中的？
 
-你可以通过预热的方式将源站的资源同步到 CDN 的节点中。这样的话，用户首次请求资源可以直接从 CDN 节点中取，无需回源。这样可以降低源站压力，提升用户体验。
+你可以通过 **预热** 的方式将源站的资源同步到 CDN 的节点中。这样的话，用户首次请求资源可以直接从 CDN 节点中取，无需回源。这样可以降低源站压力，提升用户体验。
 
-如果不预热的话，你访问的资源可能不再 CDN 节点中，这个时候 CDN 节点将请求源站获取资源，这个过程是大家经常说的 **回源**。
+如果不预热的话，你访问的资源可能不在 CDN 节点中，这个时候 CDN 节点将请求源站获取资源，这个过程是大家经常说的 **回源**。
+
+> - 回源：当 CDN 节点上没有用户请求的资源或该资源的缓存已经过期时，CDN 节点需要从原始服务器获取最新的资源内容，这个过程就是回源。当用户请求发生回源的话，会导致该请求的响应速度比未使用 CDN 还慢，因为相比于未使用 CDN 还多了一层 CDN 的调用流程。
+> - 预热：预热是指在 CDN 上提前将内容缓存到 CDN 节点上。这样当用户在请求这些资源时，能够快速地从最近的 CDN 节点获取到而不需要回源，进而减少了对源站的访问压力，提高了访问速度。
+
+![CDN 回源](https://oss.javaguide.cn/github/javaguide/high-performance/cdn/cdn-back-to-source.png)
+
+如果资源有更新的话，你也可以对其 **刷新** ，删除 CDN 节点上缓存的旧资源，并强制 CDN 节点回源站获取最新资源。
+
+几乎所有云厂商提供的 CDN 服务都具备缓存的刷新和预热功能（下图是阿里云 CDN 服务提供的相应功能）：
+
+![CDN 缓存的刷新和预热](https://oss.javaguide.cn/github/javaguide/high-performance/cdn/cdn-refresh-warm-up.png)
 
 **命中率** 和 **回源率** 是衡量 CDN 服务质量两个重要指标。命中率越高越好，回源率越低越好。
-
-如果资源有更新的话，你也可以对其 **刷新** ，删除 CDN 节点上缓存的资源，当用户访问对应的资源时直接回源获取最新的资源，并重新缓存。
 
 ### 如何找到最合适的 CDN 节点？
 
@@ -95,7 +104,7 @@ CDN 服务提供商几乎都提供了这种比较基础的防盗链机制。
 
 时间戳防盗链 URL 示例：
 
-```
+```plain
 http://cdn.wangsu.com/4/123.mp3? wsSecret=79aead3bd7b5db4adeffb93a010298b5&wsTime=1601026312
 ```
 
@@ -122,3 +131,5 @@ http://cdn.wangsu.com/4/123.mp3? wsSecret=79aead3bd7b5db4adeffb93a010298b5&wsTim
 - 时间戳防盗链 - 七牛云 CDN：<https://developer.qiniu.com/fusion/kb/1670/timestamp-hotlinking-prevention>
 - CDN 是个啥玩意？一文说个明白：<https://mp.weixin.qq.com/s/Pp0C8ALUXsmYCUkM5QnkQw>
 - 《透视 HTTP 协议》- 37 | CDN：加速我们的网络服务：<http://gk.link/a/11yOG>
+
+<!-- @include: @article-footer.snippet.md -->

@@ -18,7 +18,7 @@ tag:
 > 6. 关注全局
 > 7. 归纳总结能力
 >
-> **原文地址**：https://mp.weixin.qq.com/s/8lMGzBzXine-NAsqEaIE4g
+> **原文地址**：<https://mp.weixin.qq.com/s/8lMGzBzXine-NAsqEaIE4g>
 
 ### 建议 1：刻意加强需求评审能力
 
@@ -103,3 +103,5 @@ tag:
 普通程序员往往是工作的事情做完就拉到，很少回头去对自己的技术，对业务进行归纳和总结。
 
 而高级的程序员往往都会在一件比较大的事情做完之后总结一下，做个 ppt，写个博客啥的记录下来。这样既对自己的工作是一个归纳，也可以分享给其它同学，促进团队的共同成长。
+
+<!-- @include: @article-footer.snippet.md -->

@@ -7,9 +7,13 @@ export const highQualityTechnicalArticles = arraySidebar([
     prefix: "advanced-programmer/",
     collapsible: false,
     children: [
+      "programmer-quickly-learn-new-technology",
       "the-growth-strategy-of-the-technological-giant",
+      "ten-years-of-dachang-growth-road",
+      "meituan-three-year-summary-lesson-10",
       "seven-tips-for-becoming-an-advanced-programmer",
       "20-bad-habits-of-bad-programmers",
+      "thinking-about-technology-and-business-after-five-years-of-work",
     ],
   },
   {
@@ -30,6 +34,7 @@ export const highQualityTechnicalArticles = arraySidebar([
     prefix: "programmer/",
     collapsible: false,
     children: [
+      "high-value-certifications-for-programmers",
       "how-do-programmers-publish-a-technical-book",
       "efficient-book-publishing-and-practice-guide",
     ],
@@ -38,7 +43,7 @@ export const highQualityTechnicalArticles = arraySidebar([
     text: "面试",
     icon: "interview",
     prefix: "interview/",
-    collapsible: false,
+    collapsible: true,
     children: [
       "the-experience-of-get-offer-from-over-20-big-companies",
       "the-experience-and-thinking-of-an-interview-experienced-by-an-older-programmer",
@@ -54,9 +59,10 @@ export const highQualityTechnicalArticles = arraySidebar([
     text: "工作",
     icon: "work",
     prefix: "work/",
-    collapsible: false,
+    collapsible: true,
     children: [
       "get-into-work-mode-quickly-when-you-join-a-company",
+      "32-tips-improving-career",
       "employee-performance",
     ],
   },

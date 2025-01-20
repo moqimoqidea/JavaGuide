@@ -1,5 +1,5 @@
 ---
-title: SQL常见面试题总结
+title: SQL常见面试题总结（1）
 category: 数据库
 tag:
   - 数据库基础
@@ -50,11 +50,11 @@ FROM Customers
 答案：
 
 ```sql
-SELECT distinct prod_id
+SELECT DISTINCT prod_id
 FROM OrderItems
 ```
 
-知识点：`distinct` 用于返回列中的唯一不同值。
+知识点：`DISTINCT` 用于返回列中的唯一不同值。
 
 ### 检索所有列
 
@@ -189,17 +189,17 @@ ORDER BY vend_name DESC
 
 下面的运算符可以在 `WHERE` 子句中使用：
 
-| 运算符  | 描述                                                       |
-| :------ | :--------------------------------------------------------- |
-| =       | 等于                                                       |
-| <>      | 不等于。**注释：**在 SQL 的一些版本中，该操作符可被写成 != |
-| >       | 大于                                                       |
-| <       | 小于                                                       |
-| >=      | 大于等于                                                   |
-| <=      | 小于等于                                                   |
-| BETWEEN | 在某个范围内                                               |
-| LIKE    | 搜索某种模式                                               |
-| IN      | 指定针对某个列的多个可能值                                 |
+| 运算符  | 描述                                                         |
+| :------ | :----------------------------------------------------------- |
+| =       | 等于                                                         |
+| <>      | 不等于。 **注释：** 在 SQL 的一些版本中，该操作符可被写成 != |
+| >       | 大于                                                         |
+| <       | 小于                                                         |
+| >=      | 大于等于                                                     |
+| <=      | 小于等于                                                     |
+| BETWEEN | 在某个范围内                                                 |
+| LIKE    | 搜索某种模式                                                 |
+| IN      | 指定针对某个列的多个可能值                                   |
 
 ### 返回固定价格的产品
 
@@ -287,9 +287,10 @@ ORDER BY prod_price
 答案：
 
 ```sql
-SELECT DISTINCT order_num
+SELECT order_num
 FROM OrderItems
-WHERE quantity >= 100
+GROUP BY order_num
+HAVING SUM(quantity) >= 100
 ```
 
 ## 高级数据过滤
@@ -357,7 +358,7 @@ WHERE prod_id IN ('BR01', 'BR02', 'BR03') AND quantity >= 100
 ```sql
 SELECT prod_name, prod_price
 FROM Products
-WHERE prod_price BETWEEN 3 AND 6
+WHERE prod_price >= 3 and prod_price <= 6
 ORDER BY prod_price
 ```
 
@@ -564,7 +565,7 @@ FROM Customers
 
 知识点：
 
-- 截取函数`SUBSTRING()`：截取字符串，`substring(str ,n ,m)`：返回字符串 str 从第 n 个字符截取到第 m 个字符（左闭右闭）；
+- 截取函数`SUBSTRING()`：截取字符串，`substring(str ,n ,m)`（n 表示起始截取位置，m 表示要截取的字符个数）表示返回字符串 str 从第 n 个字符开始截取 m 个字符；
 - 拼接函数`CONCAT()`：将两个或多个字符串连接成一个字符串，select concat(A,B)：连接字符串 A 和 B。
 
 - 大写函数 `UPPER()`：将指定字符串转换为大写。
@@ -952,10 +953,9 @@ WHERE condition;
 ```sql
 SELECT cust_id
 FROM Orders
-WHERE order_num IN (SELECT order_num
+WHERE order_num IN (SELECT DISTINCT order_num
     FROM OrderItems
-    GROUP BY order_num
-    HAVING Sum(item_price) >= 10)
+    where item_price >= 10)
 ```
 
 ### 确定哪些订单购买了 prod_id 为 BR01 的产品（一）
@@ -1027,11 +1027,11 @@ ORDER BY order_date
 
 `Customers` 表代表顾客信息，`cust_id` 为顾客 id，`cust_email` 为顾客 email
 
-| cust_id | cust_email      |
-| ------- | --------------- |
-| cust10  | cust10@cust.com |
-| cust1   | cust1@cust.com  |
-| cust2   | cust2@cust.com  |
+| cust_id | cust_email        |
+| ------- | ----------------- |
+| cust10  | <cust10@cust.com> |
+| cust1   | <cust1@cust.com>  |
+| cust2   | <cust2@cust.com>  |
 
 【问题】返回购买 `prod_id` 为 `BR01` 的产品的所有顾客的电子邮件（`Customers` 表中的 `cust_email`），结果无需排序。
 
@@ -1095,13 +1095,14 @@ WHERE b.prod_id = 'BR01'
 
 ```sql
 # 写法 1：子查询
-SELECT o.cust_id AS cust_id, tb.total_ordered AS total_ordered
-FROM (SELECT order_num, Sum(item_price * quantity) AS total_ordered
+SELECT o.cust_id, SUM(tb.total_ordered) AS `total_ordered`
+FROM (SELECT order_num, SUM(item_price * quantity) AS total_ordered
     FROM OrderItems
     GROUP BY order_num) AS tb,
   Orders o
 WHERE tb.order_num = o.order_num
-ORDER BY total_ordered DESC
+GROUP BY o.cust_id
+ORDER BY total_ordered DESC;
 
 # 写法 2：连接表
 SELECT b.cust_id, Sum(a.quantity * a.item_price) AS total_ordered
@@ -1110,6 +1111,8 @@ WHERE a.order_num = b.order_num
 GROUP BY cust_id
 ORDER BY total_ordered DESC
 ```
+
+关于写法一详细介绍可以参考： [issue#2402：写法 1 存在的错误以及修改方法](https://github.com/Snailclimb/JavaGuide/issues/2402)。
 
 ### 从 Products 表中检索所有的产品名称以及对应的销售总数
 
@@ -1336,7 +1339,7 @@ ORDER BY c.cust_name,o.order_num
 
 这是错误的！只对 `cust_name` 进行聚类确实符合题意，但是不符合 `GROUP BY` 的语法。
 
-select 语句中，如果没有 `GROUP BY` 语句，那么 `cust_name`、`order_num` 会返回若干个值，而 `sum(quantity _ item_price)` 只返回一个值，通过 `group by` `cust_name` 可以让 `cust_name` 和 `sum(quantity _ item_price)` 一一对应起来，或者说**聚类**，所以同样的，也要对 `order_num` 进行聚类。
+select 语句中，如果没有 `GROUP BY` 语句，那么 `cust_name`、`order_num` 会返回若干个值，而 `sum(quantity * item_price)` 只返回一个值，通过 `group by` `cust_name` 可以让 `cust_name` 和 `sum(quantity * item_price)` 一一对应起来，或者说**聚类**，所以同样的，也要对 `order_num` 进行聚类。
 
 > **一句话，select 中的字段要么都聚类，要么都不聚类**
 
@@ -1417,11 +1420,11 @@ ORDER BY order_date
 
 `Customers` 表代表顾客信息，`cust_id` 为顾客 id，`cust_email` 为顾客 email
 
-| cust_id | cust_email      |
-| ------- | --------------- |
-| cust10  | cust10@cust.com |
-| cust1   | cust1@cust.com  |
-| cust2   | cust2@cust.com  |
+| cust_id | cust_email        |
+| ------- | ----------------- |
+| cust10  | <cust10@cust.com> |
+| cust1   | <cust1@cust.com>  |
+| cust2   | <cust2@cust.com>  |
 
 【问题】返回购买 `prod_id` 为 BR01 的产品的所有顾客的电子邮件（`Customers` 表中的 `cust_email`），结果无需排序。
 
@@ -1653,12 +1656,12 @@ ORDER BY prod_name
 注意：`vend_id` 列会显示在多个表中，因此在每次引用它时都需要完全限定它。
 
 ```sql
-SELECT vend_id, COUNT(prod_id) AS prod_id
-FROM Vendors
-LEFT JOIN Products
+SELECT v.vend_id, COUNT(prod_id) AS prod_id
+FROM Vendors v
+LEFT JOIN Products p
 USING(vend_id)
-GROUP BY vend_id
-ORDER BY vend_id
+GROUP BY v.vend_id
+ORDER BY v.vend_id
 ```
 
 ## 组合查询
@@ -1779,11 +1782,11 @@ ORDER BY prod_name
 
 表 `Customers` 含有字段 `cust_name` 顾客名、`cust_contact` 顾客联系方式、`cust_state` 顾客州、`cust_email` 顾客 `email`
 
-| cust_name | cust_contact | cust_state | cust_email      |
-| --------- | ------------ | ---------- | --------------- |
-| cust10    | 8695192      | MI         | cust10@cust.com |
-| cust1     | 8695193      | MI         | cust1@cust.com  |
-| cust2     | 8695194      | IL         | cust2@cust.com  |
+| cust_name | cust_contact | cust_state | cust_email        |
+| --------- | ------------ | ---------- | ----------------- |
+| cust10    | 8695192      | MI         | <cust10@cust.com> |
+| cust1     | 8695193      | MI         | <cust1@cust.com>  |
+| cust2     | 8695194      | IL         | <cust2@cust.com>  |
 
 【问题】修正下面错误的 SQL
 
@@ -1821,3 +1824,5 @@ FROM Customers
 WHERE cust_state = 'MI' or cust_state = 'IL'
 ORDER BY cust_name;
 ```
+
+<!-- @include: @article-footer.snippet.md -->

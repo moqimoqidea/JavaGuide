@@ -1,4 +1,4 @@
-import { getDirname, path } from "@vuepress/utils";
+import { getDirname, path } from "vuepress/utils";
 import { hopeTheme } from "vuepress-theme-hope";
 
 import navbar from "./navbar.js";
@@ -7,10 +7,9 @@ import sidebar from "./sidebar/index.js";
 const __dirname = getDirname(import.meta.url);
 
 export default hopeTheme({
-  logo: "/logo.png",
   hostname: "https://javaguide.cn/",
-
-  iconAssets: "//at.alicdn.com/t/c/font_2922463_kweia6fbo9.css",
+  logo: "/logo.png",
+  favicon: "/favicon.ico",
 
   author: {
     name: "Guide",
@@ -28,15 +27,7 @@ export default hopeTheme({
     '<a href="https://beian.miit.gov.cn/" target="_blank">鄂ICP备2020015769号-1</a>',
   displayFooter: true,
 
-  pageInfo: [
-    "Author",
-    "Category",
-    "Tag",
-    "Date",
-    "Original",
-    "Word",
-    "ReadingTime",
-  ],
+  pageInfo: ["Author", "Category", "Tag", "Original", "Word", "ReadingTime"],
 
   blog: {
     intro: "/about-the-author/",
@@ -48,32 +39,50 @@ export default hopeTheme({
     },
   },
 
+  markdown: {
+    align: true,
+    codeTabs: true,
+    gfm: true,
+    include: {
+      resolvePath: (file, cwd) => {
+        if (file.startsWith("@"))
+          return path.resolve(
+            __dirname,
+            "../snippets",
+            file.replace("@", "./"),
+          );
+
+        return path.resolve(cwd, file);
+      },
+    },
+    tasklist: true,
+  },
+
   plugins: {
     blog: true,
-    copyright: true,
-    mdEnhance: {
-      align: true,
-      codetabs: true,
-      container: true,
-      figure: true,
-      include: {
-        resolvePath: (file, cwd) => {
-          if (file.startsWith("@"))
-            return path.resolve(
-              __dirname,
-              "../snippets",
-              file.replace("@", "./")
-            );
 
-          return path.resolve(cwd, file);
-        },
-      },
-      tasklist: true,
+    copyright: {
+      author: "JavaGuide(javaguide.cn)",
+      license: "MIT",
+      triggerLength: 100,
+      maxLength: 700,
+      canonical: "https://javaguide.cn/",
+      global: true,
     },
+
     feed: {
       atom: true,
       json: true,
       rss: true,
+    },
+
+    icon: {
+      assets: "//at.alicdn.com/t/c/font_2922463_o9q9dxmps9.css",
+    },
+
+    search: {
+      isSearchable: (page) => page.path !== "/",
+      maxSuggestions: 10,
     },
   },
 });
